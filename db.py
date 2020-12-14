@@ -1,7 +1,7 @@
 import cx_Oracle
 #connection = cx_Oracle.connect("system","zakaria","localhost/orcl")
 try:
-	conn = cx_Oracle.connect("C##ZAKARIA","zakaria","localhost/orcl")
+	conn = cx_Oracle.connect("C##ZAKARIA","zakaria","localhost/orcl") # username: C#ZAKARIA   password: zakaria 
 except Exception as err:
 	print('Error while creating the connection ',err)
 cur = conn.cursor()
