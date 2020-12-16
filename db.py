@@ -1,13 +1,13 @@
 import cx_Oracle
 #connection = cx_Oracle.connect("system","zakaria","localhost/orcl")
 try:
-	conn = cx_Oracle.connect("C##ZAKARIA","zakaria","localhost/orcl") # username: C#ZAKARIA   password: zakaria 
+	conn = cx_Oracle.connect("C##ZAKARIA","zakaria","localhost/orcl")
 except Exception as err:
 	print('Error while creating the connection ',err)
 cur = conn.cursor()
 print('les tables: client, marchandise, commande, ligne_commande')
 table=input('Donner le nom de la table: ')
-ope=input('Donner le type d\'operation (select, insert, delete, update, join):')
+ope=input('Donner le type d\'operation (select, insert, delete, update, join,search):')
 if ope.upper()=='INSERT':	
     if table.lower()=='client':
 	    c=list()
@@ -191,6 +191,43 @@ elif ope.upper()=='JOIN':
     rows = cur.fetchall()
     for row in rows:
         print(row)
+elif ope.upper()=='SEARCH':
+    if table.lower()=='client':
+        sql="""SELECT * FROM client WHERE id_client LIKE :id"""
+        id=input('Donner l\'id du client que vous cherchez: ')
+        data={'id':id}
+        cur.execute(sql,data)
+        row=cur.fetchall()
+        for  record in row:
+            print('l\'id est: ',record[0],' nom: ',record[1])
+    elif table.lower()=='commande':
+        sql="""SELECT cl.id_client, cl.nom_client, com.id_commande, m.id_marchandise, m.description, m.unit_price, 
+            lc.quantity, lc.quantity*m.unit_price AS "Prix total"
+            FROM client cl, commande com, marchandise m, ligne_commande lc
+            WHERE cl.id_client= com.id_client AND com.id_commande=lc.id_commande AND lc.id_marchandise=m.id_marchandise
+            AND com.id_commande=:idcom """
+        idcom=input('Donner l\'id de la commande que vous cherchez: ')
+        data={'idcom':idcom}
+        cur.execute(sql,data)
+        rows=cur.fetchall()
+        print(' \t\t\t\t-------------la commande numéro: ',idcom,'---------------------')
+        for record in rows:
+            print('l\'id de client: ',record[0], ' son nom: ',record[1], ' l\'id de sa commande: ',record[2],  ' l\'id de la marchandise acheté: ',record[3])
+            print('la description de la marchandise: ',record[4])
+            print('le prix unitaire est: ',record[5], ' la quantité commandé: ',record[6])
+            print('Le prix total : ',record[7])
+            print('\t\t\t----------------------------------------------------')
+    elif table.lower()=='marchandise':
+        sql="""SELECT * FROM marchandise WHERE id_marchandise=:idmar"""
+        idmar=input('Donner l\'id de marchandise que vous cherchez: ')
+        data={'idmar':idmar}
+        cur.execute(sql,data)
+        row=cur.fetchone()
+        print('l\'id de la marchandise: ',row[0])
+        print('Description: ',row[1])
+        print('Le prix: ',row[2]) 
+    else:
+         print('La table ' + table + ' n\'exsiste pas dans la base de donnees !!')      
 else:
     print('Operation inconnu!!!')
 conn.commit()
